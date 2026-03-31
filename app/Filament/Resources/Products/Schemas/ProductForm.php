@@ -30,7 +30,10 @@ class ProductForm
                     ->required(),
 
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
+                TextInput::make('description')
+                    ->nullable(),
                 TextInput::make('price')
                     ->required()
                     ->numeric()
@@ -42,6 +45,7 @@ class ProductForm
                     ->image()
                     ->disk('public')
                     ->directory('products')
+                    
                     ->visibility('public')
                     ->nullable()
             ]);

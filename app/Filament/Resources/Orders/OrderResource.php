@@ -32,12 +32,14 @@ class OrderResource extends Resource
 
         $user = auth()->user();
 
-        if ($user && $user->role === 'seller') {
+        if ($user && $user->role === 'admin') {
             $query->where('seller_id', $user->id);
         }
 
         return $query;
     }
+
+
 
     public static function getPages(): array
     {

@@ -27,6 +27,7 @@ class Profile extends Page
             'name'  => auth()->user()->name,
             'email' => auth()->user()->email,
             'role' => auth()->user()->role,
+            'no_rekening' => auth()->user()->no_rekening,
         ]);
     }
 
@@ -45,9 +46,9 @@ class Profile extends Page
                     ->maxSize(2048) // 2MB
                     ->imageEditor(true), // matikan dulu biar stabil
 
-                TextInput::make('no_rekening')
-                    ->label('No. Rekening')
-                    ->required(),
+                // TextInput::make('no_rekening')
+                //     ->label('No. Rekening')
+                //     ->required(),
 
                 TextInput::make('name')
                     ->required(),
@@ -82,7 +83,7 @@ class Profile extends Page
 
     public static function canAccess(): bool
     {
-        return false;
+        return true;
     }
 
 

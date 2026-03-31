@@ -1,139 +1,116 @@
 @extends("layouts.app1")
 
 @section("content")
-<div class="min-h-screen flex items-center justify-center bg-slate-100 p-4">
-    <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
 
-        <h2 class="text-2xl font-bold text-center mb-6">
-            Buat Akun Baru
-        </h2>
+    <div
+        class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-slate-100 p-4">
 
-        {{-- ROLE SELECT --}}
-        <div class="flex gap-2 mb-6">
-            <button type="button" onclick="setRole('customer')" id="btnCustomer"
-                class="flex-1 py-2 rounded bg-blue-600 text-white">
-                Customer
-            </button>
+        <div class="max-w-md w-full bg-white/80 backdrop-blur rounded-2xl shadow-2xl p-8 space-y-6">
 
-            <button type="button" onclick="setRole('seller')" id="btnSeller"
-                class="flex-1 py-2 rounded bg-slate-200">
-                Seller
-            </button>
-        </div>
+            <h2 class="text-2xl font-extrabold text-center text-slate-800">
+                Buat Akun Baru
+            </h2>
 
-        {{-- ERROR --}}
-        @if(session('error'))
-            <p class="text-red-600 mb-4">{{ session('error') }}</p>
-        @endif
-
-        {{-- SUCCESS --}}
-        @if(session('success'))
-            <p class="text-green-600 mb-4">{{ session('success') }}</p>
-        @endif
-
-        <form method="POST" action="/auth/register" enctype="multipart/form-data" class="space-y-4">
-            @csrf
-
-            <input type="hidden" name="role" id="roleInput" value="customer">
-
-            {{-- FOTO PROFIL --}}
-            <div>
-                <label class="block text-sm text-slate-600 mb-1">
-                    Foto Profil
-                </label>
-                <input type="file" name="foto" accept="image/*" class="w-full text-sm" required>
+            {{-- ROLE SELECT --}}
+            <div class="flex gap-2 bg-slate-100 p-1 rounded-xl">
+                <button type="button" onclick="setRole('customer')" id="btnCustomer"
+                    class="flex-1 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold transition">
+                    Customer
+                </button>
             </div>
 
-            <input name="nik"
-                placeholder="NIK"
-                class="w-full border px-4 py-2 rounded">
+            {{-- ERROR --}}
+            @if ($errors->any())
+                <div class="mb-4 p-3 bg-red-100 text-red-600 rounded-lg text-sm">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-            <input name="name"
-                placeholder="Nama Lengkap"
-                class="w-full border px-4 py-2 rounded">
+            {{-- SUCCESS --}}
+            @if(session('success'))
+                <p class="text-green-500 text-sm">{{ session('success') }}</p>
+            @endif
 
-            <input name="email"
-                type="email"
-                placeholder="Email"
-                class="w-full border px-4 py-2 rounded">
+            <form method="POST" action="/auth/register" enctype="multipart/form-data" class="space-y-4">
+                @csrf
 
-            {{-- <input name="alamat"
-                type="text"
-                placeholder="Alamat"
-                class="w-full border px-4 py-2 rounded"> --}}
+                <input type="hidden" name="role" id="roleInput" value="customer">
 
-            <input name="password"
-                type="password"
-                placeholder="Password"
-                class="w-full border px-4 py-2 rounded">
+                {{-- FOTO PROFIL --}}
+                <div class="text-center">
 
-            <input name="password_confirmation"
-                type="password"
-                placeholder="Konfirmasi Password"
-                class="w-full border px-4 py-2 rounded">
-
-            {{-- SELLER ONLY --}}
-            <div id="sellerFields" class="hidden space-y-4">
-
-                <input name="no_rekening"
-                    placeholder="Nomor Rekening"
-                    class="w-full border px-4 py-2 rounded">
-
-                <div>
-                    <label class="block text-sm text-slate-600 mb-1">
-                        QRIS (Opsional)
+                    <label class="block text-sm text-slate-600 mb-2">
+                        Foto Profil
                     </label>
-                    <input type="file" name="qris" accept="image/*" class="w-full text-sm">
+
+                    <div class="flex justify-center mb-3">
+
+                        <img id="previewImage" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff"
+                            class="w-24 h-24 rounded-full object-cover shadow border">
+
+                    </div>
+
+                    <input type="file" name="foto" accept="image/*" onchange="previewFoto(event)"
+                        class="w-full text-sm file:px-3 file:py-1 file:rounded file:border-0 file:bg-indigo-100 file:text-indigo-600 hover:file:bg-indigo-200"
+                        required>
+
                 </div>
 
+                {{-- INPUT --}}
+                <input name="nik" placeholder="NIK"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+                <input name="name" placeholder="Nama Lengkap"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+                <input name="email" type="email" placeholder="Email"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+                <input name="password" type="password" placeholder="Password"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+                <input name="password_confirmation" type="password" placeholder="Konfirmasi Password"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+
+                {{-- BUTTON --}}
+                <button type="submit" class="w-full py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500
+                               hover:opacity-90 text-white font-semibold shadow transition">
+
+                    Daftar
+                </button>
+
+            </form>
+
+            <div class="text-center text-sm text-slate-500">
+                Sudah punya akun?
+                <a href="/customer/login" class="text-indigo-600 font-medium hover:underline">
+                    Login
+                </a>
             </div>
 
-            <button type="submit"
-                class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-                Daftar
-            </button>
-
-        </form>
-
-        <div class="mt-6 text-center text-sm">
-            Sudah punya akun?
-            <a href="/login" class="text-blue-600 hover:underline">
-                Login
-            </a>
         </div>
 
     </div>
-</div>
 
-<script>
-function setRole(role) {
+    {{-- SCRIPT --}}
+    <script>
+        function setRole(role) {
+            document.getElementById('roleInput').value = role;
+        }
 
-    document.getElementById('roleInput').value = role;
+        // PREVIEW FOTO
+        function previewFoto(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('previewImage');
 
-    const sellerFields = document.getElementById('sellerFields');
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+            }
+        }
+    </script>
 
-    const btnCustomer = document.getElementById('btnCustomer');
-    const btnSeller = document.getElementById('btnSeller');
-
-    if(role === 'seller'){
-        sellerFields.classList.remove('hidden');
-
-        btnSeller.classList.remove('bg-slate-200');
-        btnSeller.classList.add('bg-blue-600','text-white');
-
-        btnCustomer.classList.remove('bg-blue-600','text-white');
-        btnCustomer.classList.add('bg-slate-200');
-
-    } else {
-
-        sellerFields.classList.add('hidden');
-
-        btnCustomer.classList.remove('bg-slate-200');
-        btnCustomer.classList.add('bg-blue-600','text-white');
-
-        btnSeller.classList.remove('bg-blue-600','text-white');
-        btnSeller.classList.add('bg-slate-200');
-    }
-}
-</script>
 @endsection

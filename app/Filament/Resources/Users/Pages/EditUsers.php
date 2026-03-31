@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Filament\Resources\Products\Pages;
+namespace App\Filament\Resources\Users\Pages;
 
-use App\Filament\Resources\Products\ProductResource;
+use App\Filament\Resources\Users\UsersResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 
-class EditProduct extends EditRecord
+class EditUsers extends EditRecord
 {
-    protected static string $resource = ProductResource::class;
+    protected static string $resource = UsersResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -19,18 +19,17 @@ class EditProduct extends EditRecord
             DeleteAction::make()
                 ->before(function ($record) {
 
-                    if ($record->stock > 0) {
+                    if ($record->is_active === 'Online') {
 
                         Notification::make()
-                            ->title('Produk tidak bisa dihapus')
-                            ->body('Stok produk masih tersedia.')
+                            ->title('Users tidak bisa dihapus')
+                            ->body('Users sedang login.')
                             ->danger()
                             ->send();
 
                         $this->halt();
                     }
                 }),
-
             ForceDeleteAction::make(),
             RestoreAction::make(),
         ];

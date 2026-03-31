@@ -31,6 +31,7 @@ class User extends Authenticatable implements HasAvatar
         'no_rekening',
         'role',
         'image',
+        'is_active',
         'otp',
         'otp_expired',
     ];

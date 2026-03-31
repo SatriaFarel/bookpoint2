@@ -5,11 +5,13 @@ namespace App\Filament\Resources\Products\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
+use Filament\Notifications\Notification;
 use Filament\Tables\Table;
 
 class ProductsTable
@@ -48,6 +50,20 @@ class ProductsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make()
+                ->before(function ($record, $action) {
+
+                    if ($record->stock > 0) {
+
+                        Notification::make()
+                            ->title('Produk tidak bisa dihapus')
+                            ->body('Stok produk masih tersedia.')
+                            ->danger()
+                            ->send();
+
+                        $action->cancel();
+                    }
+                }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

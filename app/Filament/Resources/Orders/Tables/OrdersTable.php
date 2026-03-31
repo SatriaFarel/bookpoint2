@@ -5,9 +5,8 @@ namespace App\Filament\Resources\Orders\Tables;
 use Filament\Actions\Action as ActionsAction;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
 use Filament\Forms;
-use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Utilities\Set;
 
 class OrdersTable
 {
@@ -22,6 +21,12 @@ class OrdersTable
                 TextColumn::make('order_code')
                     ->label('Order Code')
                     ->searchable()
+                    ->sortable(),
+                
+                /* ORDER DATE */
+                TextColumn::make('created_at')
+                    ->label('Order Date')
+                    ->dateTime()
                     ->sortable(),
 
                 /* CUSTOMER */
@@ -68,22 +73,41 @@ class OrdersTable
                             ->label('Metode Pembayaran')
                             ->options([
                                 'cash' => 'Cash',
-                                'transfer' => 'Transfer',
-                                'qris' => 'QRIS',
+                                // 'transfer' => 'Transfer',
+                                // 'qris' => 'QRIS',
                             ])
                             ->required(),
 
                         Forms\Components\TextInput::make('paid_amount')
                             ->label('Jumlah Bayar')
                             ->numeric()
+                            ->prefix('Rp')
+                            ->live(debounce: 300)
+                            ->afterStateHydrated(function (Set $set) {
+                                $set('change_amount', 0);
+                            })
+                            ->afterStateUpdated(function ($state, Set $set, $record) {
+                                $paid = (float) ($state ?? 0);
+                                $total = (float) $record->total_price;
+                                $change = $paid - $total;
+
+                                $set('change_amount', $change > 0 ? $change : 0);
+                            })
                             ->required(),
+
+                        Forms\Components\TextInput::make('change_amount')
+                            ->label('Kembalian')
+                            ->prefix('Rp')
+                            ->numeric()
+                            ->readOnly()
+                            ->dehydrated(false),
 
                     ])
 
                     ->action(function ($record, $data) {
 
                         $total = $record->total_price;
-                        $paid  = $data['paid_amount'];
+                        $paid  = (float) $data['paid_amount'];
 
                         // cek uang cukup
                         if ($paid < $total) {
@@ -104,16 +128,13 @@ class OrdersTable
                             'status' => 'paid'
                         ]);
 
-                        foreach ($record->items as $item) {
-
-                            $product = $item->product;
-
-                            $product->decrement('stock', $item->quantity);
-                        }
-
                         \Filament\Notifications\Notification::make()
                             ->title('Pembayaran berhasil')
-                            ->body('Kembalian: Rp ' . number_format($change))
+                            ->body(
+                                'Total: Rp ' . number_format($total) .
+                                ' | Bayar: Rp ' . number_format($paid) .
+                                ' | Kembalian: Rp ' . number_format($change)
+                            )
                             ->success()
                             ->send();
 
@@ -137,13 +158,13 @@ class OrdersTable
                             'status' => 'done'
                         ]);
                     }),
-
                 ActionsAction::make('print')
                     ->label('Print Struk')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
                     ->url(fn($record) => url('/admin/invoice/' . $record->id))
-                    ->openUrlInNewTab(),
+                    ->openUrlInNewTab()
+                    ->visible(fn($record) => in_array($record->status, ['paid', 'done'])),
 
             ]);
     }

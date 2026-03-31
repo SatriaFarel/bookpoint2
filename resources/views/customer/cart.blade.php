@@ -5,10 +5,10 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
 
         {{-- NAV --}}
-        <nav class="bg-white/80 backdrop-blur border-b sticky top-0 z-20 shadow-sm">
+           <nav class="bg-white/70 backdrop-blur border-b border-indigo-100 sticky top-0 z-20 px-4 py-4 shadow-sm">
             <div class="max-w-5xl mx-auto flex items-center gap-4 p-4">
 
-                <a href="/dashboard" class="text-lg hover:text-blue-600 transition">←</a>
+                <a href="/customer/dashboard" class="text-lg hover:text-blue-600 transition">←</a>
 
                 <h1 class="text-xl font-bold text-slate-800">
                     Keranjang
@@ -22,6 +22,18 @@
 
             {{-- CART ITEMS --}}
             <div class="lg:col-span-2 space-y-5">
+
+                @if ($errors->has('cart'))
+                    <div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                        {{ $errors->first('cart') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="bg-green-100 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+                        {{ session('success') }}
+                    </div>
+                @endif
 
                 @forelse($cartItems as $item)
 
@@ -50,9 +62,37 @@
                                             Qty: {{ $item['qty'] }}
                                         </p>
 
+                                        <p class="text-xs text-slate-400">
+                                            Stok tersedia: {{ $item['stock'] ?? '-' }}
+                                        </p>
+
                                         <p class="font-bold text-blue-600 mt-1">
                                             Rp {{ number_format($item['price'] * $item['qty']) }}
                                         </p>
+
+                                        <div class="mt-3 flex items-center gap-2" onclick="event.stopPropagation()">
+                                            <form method="POST" action="/customer/cart/update/{{ $item['id'] }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="qty" value="{{ max(1, $item['qty'] - 1) }}">
+                                                <button class="w-8 h-8 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition"
+                                                        {{ $item['qty'] <= 1 ? 'disabled' : '' }}>
+                                                    -
+                                                </button>
+                                            </form>
+
+                                            <span class="text-sm font-semibold w-8 text-center">{{ $item['qty'] }}</span>
+
+                                            <form method="POST" action="/customer/cart/update/{{ $item['id'] }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="qty" value="{{ $item['qty'] + 1 }}">
+                                                <button class="w-8 h-8 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-100 transition"
+                                                        {{ isset($item['stock']) && $item['qty'] >= $item['stock'] ? 'disabled' : '' }}>
+                                                    +
+                                                </button>
+                                            </form>
+                                        </div>
 
                                     </div>
 

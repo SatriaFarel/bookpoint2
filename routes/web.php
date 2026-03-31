@@ -18,13 +18,6 @@ use App\Http\Controllers\ChatController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/customer/about', function () {
-    return view('customer.about');
-});
-
-Route::get('/customer/help', function () {
-    return view('customer.help');
-});
 
 Route::get('/admin/invoice/{id}', [OrderController::class, 'invoice']);
 
@@ -36,30 +29,17 @@ Route::get('/admin/invoice/{id}', [OrderController::class, 'invoice']);
 */
 
 Route::prefix('customer')->group(function () {
-
     Route::view('/login', 'login');
     Route::view('/register', 'register');
     Route::get('/forgot-password', [AuthController::class, 'index'])->name('customer.forgot.password');
     Route::post('/forgot-password', [AuthController::class, 'sendOtp']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-
-    Route::get('/chat/{user}', [ChatController::class, 'show'])
-        ->name('chat.show');
 });
-
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/logout', [AuthController::class, 'logout']);
 
-/*
-|--------------------------------------------------------------------------
-| DASHBOARD
-|--------------------------------------------------------------------------
-*/
 
-Route::get('/dashboard', [ProductController::class, 'index'])
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
 
 /*
 |--------------------------------------------------------------------------
@@ -67,13 +47,26 @@ Route::get('/dashboard', [ProductController::class, 'index'])
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->prefix('customer')->group(function () {
+Route::middleware('auth:customer')->prefix('customer')->group(function () {
+
+    /*
+    | Auth
+    */
+
+
+    Route::get('/chat/{user}', [ChatController::class, 'show'])
+        ->name('chat.show');
+
+
+    Route::get('/dashboard', [ProductController::class, 'index'])
+        ->name('dashboard');
 
     /*
     | Checkout
     */
     Route::get('/checkout', [CheckoutController::class, 'index']);
     Route::post('/checkout', [CheckoutController::class, 'store']);
+    Route::get('/checkout/result', [CheckoutController::class, 'result']);
 
     /*
     | Invoice
@@ -91,7 +84,16 @@ Route::middleware('auth')->prefix('customer')->group(function () {
     */
     Route::get('/cart', [CartController::class, 'index']);
     Route::post('/cart/add', [CartController::class, 'add']);
+    Route::patch('/cart/update/{id}', [CartController::class, 'update']);
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
+
+    Route::get('/about', function () { return view('customer.about');
+    });
+    Route::get('/profil', [ProfileController::class, 'edit'])->name('customer.profile.edit');
+    Route::patch('/profil', [ProfileController::class, 'update'])->name('customer.profile.update');
+    Route::get('/profile', [ProfileController::class, 'edit']);
+
+    Route::get('/help', function () { return view('customer.help'); });
 });
 
 /*

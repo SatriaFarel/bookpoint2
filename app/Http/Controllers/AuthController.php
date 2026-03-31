@@ -24,12 +24,12 @@ class AuthController extends Controller
             'foto'     => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
-        if ($request->role === 'seller') {
-            $request->validate([
-                'no_rekening' => 'required|string',
-                'qris_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-        }
+        // if ($request->role === 'seller') {
+        //     $request->validate([
+        //         'no_rekening' => 'required|string',
+        //         'qris_image'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        //     ]);
+        // }
 
         /* upload qris */
         $qrisPath = null;
@@ -55,11 +55,9 @@ class AuthController extends Controller
             // 'is_online'   => false,
         ]);
 
-        return redirect('/login')
+        return redirect('/customer/login')
             ->with('success', 'Registrasi berhasil, silakan login');
     }
-
-
 
     /* ================= LOGIN ================= */
     public function login(Request $request)
@@ -69,34 +67,34 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!Auth::guard('customer')->attempt($request->only('email', 'password'))) {
             return back()->with('error', 'Email atau password salah');
         }
 
-        $user = Auth::user();
+        $user = Auth::guard('customer')->user();
 
-        // if (!$user->is_active) {
-        //     Auth::logout();
-        //     return back()->with('error','Akun tidak aktif');
-        // }
+        if (!$user->is_active) {
+            Auth::logout();
+            return back()->with('error', 'Akun tidak aktif');
+        }
 
-        // $user->update([
-        //     'is_online' => true
-        // ]);
+        $user->update([
+            'is_active' => 'Online'
+        ]);
 
-        return redirect('/dashboard');
+        return redirect('/customer/dashboard');
     }
 
     /* ================= LOGOUT ================= */
     public function logout()
     {
-        if (Auth::check()) {
+        if (Auth::guard('customer')->check()) {
 
-            // Auth::user()->update([
-            //     'is_online' => false
-            // ]);
+            Auth::guard('customer')->user()->update([
+                'is_active' => 'Offline'
+            ]);
 
-            Auth::logout();
+            Auth::guard('customer')->logout();
         }
 
         return redirect('/customer/login')
@@ -116,7 +114,9 @@ class AuthController extends Controller
             'email' => 'required|email'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $email = trim(strtolower($request->email));
+
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if (!$user) {
             return back()->with('error', 'Email tidak ditemukan');
@@ -179,8 +179,6 @@ class AuthController extends Controller
             ->with('step', 2)
             ->with('email', $request->email);
     }
-
-
     /* ================= RESET PASSWORD ================= */
 
     public function resetPassword(Request $request)

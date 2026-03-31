@@ -10,6 +10,12 @@
                 Checkout
             </h1>
 
+            @if ($errors->has('checkout'))
+                <div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                    {{ $errors->first('checkout') }}
+                </div>
+            @endif
+
 
             <form method="POST" action="/customer/checkout">
                 @csrf

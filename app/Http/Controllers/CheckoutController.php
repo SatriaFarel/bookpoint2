@@ -7,7 +7,9 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
 {
@@ -50,45 +52,100 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {
-        
+        $request->validate([
+            'seller_id' => 'required|array|min:1',
+            'seller_id.*' => 'required|integer',
+            'items' => 'required|array',
+        ]);
+
         $createdOrders = [];
+        $customerId = Auth::guard('customer')->id();
 
-        foreach ($request->seller_id as $sellerId) {
+        DB::transaction(function () use ($request, &$createdOrders, $customerId) {
+            foreach ($request->seller_id as $sellerId) {
+                if (!isset($request->items[$sellerId]) || !is_array($request->items[$sellerId])) {
+                    throw ValidationException::withMessages([
+                        'checkout' => 'Data item checkout tidak valid.',
+                    ]);
+                }
 
-            $total = 0;
+                $total = 0;
+                $validatedItems = [];
 
-            foreach ($request->items[$sellerId] as $item) {
-                $total += $item['quantity'] * $item['price'];
-            
-            }
+                foreach ($request->items[$sellerId] as $item) {
+                    $product = Product::find($item['product_id']);
 
-            $orderCode = 'ORD-' . strtoupper(Str::random(6));
+                    if (!$product) {
+                        throw ValidationException::withMessages([
+                            'checkout' => 'Produk tidak ditemukan.',
+                        ]);
+                    }
 
-            $order = Order::create([
-                'order_code' => $orderCode,
-                'customer_id' => Auth::id(),
-                'seller_id' => $sellerId,
-                'total_price' => $total,
-                'status' => 'pending'
-            ]);
+                    $qty = (int) $item['quantity'];
+                    if ($qty < 1) {
+                        throw ValidationException::withMessages([
+                            'checkout' => 'Qty produk tidak valid.',
+                        ]);
+                    }
 
-            foreach ($request->items[$sellerId] as $item) {
+                    if ($qty > (int) $product->stock) {
+                        throw ValidationException::withMessages([
+                            'checkout' => 'Qty untuk "' . $product->name . '" melebihi stok tersedia (' . $product->stock . ').',
+                        ]);
+                    }
 
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                    'price' => $item['price']
+                    $linePrice = (int) $product->price;
+                    $subtotal = $qty * $linePrice;
+
+                    $validatedItems[] = [
+                        'product' => $product,
+                        'quantity' => $qty,
+                        'price' => $linePrice,
+                    ];
+
+                    $total += $subtotal;
+                }
+
+                $orderCode = 'ORD-' . strtoupper(Str::random(6));
+
+                $order = Order::create([
+                    'order_code' => $orderCode,
+                    'customer_id' => $customerId,
+                    'seller_id' => $sellerId,
+                    'total_price' => $total,
+                    'status' => 'pending',
                 ]);
-            }
 
-            $createdOrders[] = $orderCode;
-        }
+                foreach ($validatedItems as $item) {
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $item['product']->id,
+                        'quantity' => $item['quantity'],
+                        'price' => $item['price'],
+                    ]);
+
+                    $item['product']->decrement('stock', $item['quantity']);
+                }
+
+                $createdOrders[] = $orderCode;
+            }
+        });
 
         session()->forget('cart');
 
-        return redirect('/customer/transactions')
-            ->with('success', 'Pesanan dibuat. Kode pesanan: ' . implode(', ', $createdOrders));
+        return redirect('/customer/checkout/result')
+            ->with('checkout_success', true)
+            ->with('created_order_codes', $createdOrders);
     }
 
+    public function result()
+    {
+        if (!session('checkout_success')) {
+            return redirect('/customer/dashboard');
+        }
+
+        return view('customer.checkout-result', [
+            'orderCodes' => session('created_order_codes', []),
+        ]);
+    }
 }

@@ -17,4 +17,10 @@ class Help extends Page
     protected static ?string $pluralModelLabel = 'Help';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQuestionMarkCircle;
+
+    public static function canAccess(): bool
+    {
+        return false;
+    }
+
 }

@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Customers\Schemas;
+namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 
-class CustomerForm
+
+class UsersForm
 {
     public static function configure(Schema $schema): Schema
     {
@@ -35,7 +36,6 @@ class CustomerForm
                 Select::make('role')
                     ->options([
                         'admin' => 'Admin',
-                        'seller' => 'Seller',
                         'customer' => 'Customer',
                     ])
                     ->required()

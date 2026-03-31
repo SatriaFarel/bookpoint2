@@ -78,6 +78,10 @@
                         {{ $partner->name }}
                     </p>
 
+                    <p class="text-xs {{ $partner->is_active === 'Online' ? 'text-green-500' : 'text-gray-400' }}">
+                        ● {{ $partner->is_active }}
+                    </p>
+
                 @else
 
                     <p class="text-gray-400 dark:text-gray-500">
@@ -99,16 +103,16 @@
                             <div class="flex {{ $m->sender_id == auth()->id() ? 'justify-end' : 'justify-start' }}">
 
                                 <div class="
-                                    px-4 py-2
-                                    rounded-2xl
-                                    text-sm
-                                    max-w-xs
-                                    shadow
-                                    {{ $m->sender_id == auth()->id()
+                                                px-4 py-2
+                                                rounded-2xl
+                                                text-sm
+                                                max-w-xs
+                                                shadow
+                                                {{ $m->sender_id == auth()->id()
                         ? 'bg-blue-600 text-white'
                         : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border dark:border-gray-700'
-                                    }}
-                                ">
+                                                }}
+                                            ">
 
                                     {{ $m->message }}
 

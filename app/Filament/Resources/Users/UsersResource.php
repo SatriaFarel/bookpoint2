@@ -1,14 +1,13 @@
 <?php
 
-namespace App\Filament\Resources\Products;
+namespace App\Filament\Resources\Users;
 
-use App\Filament\Resources\Products\Pages\CreateProduct;
-use App\Filament\Resources\Products\Pages\EditProduct;
-use App\Filament\Resources\Products\Pages\ListProducts;
-use App\Filament\Resources\Products\Schemas\ProductForm;
-use App\Filament\Resources\Products\Tables\ProductsTable;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Product;
+use App\Filament\Resources\Users\Pages\CreateUsers;
+use App\Filament\Resources\Users\Pages\EditUsers;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Schemas\UsersForm;
+use App\Filament\Resources\Users\Tables\UsersTable;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -17,45 +16,40 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class ProductResource extends Resource
+class UsersResource extends Resource
 {
-    protected static ?string $model = Product::class;
+    protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Product';
-
+    protected static ?string $recordTitleAttribute = 'User';
+    protected static ?string $modelLabel = 'User';
+    protected static ?string $pluralModelLabel = 'Users';
+    protected static ?string $navigationLabel = 'Users';
     protected static string | \UnitEnum | null $navigationGroup = 'Manajemen';
 
     public static function form(Schema $schema): Schema
     {
-        return ProductForm::configure($schema);
+        return UsersForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return ProductsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
+        return UsersTable::configure($table);
     }
 
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('seller_id', Auth::id());
+            ->where('id', '!=', auth()->id());
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListProducts::route('/'),
-            'create' => CreateProduct::route('/create'),
-            'edit' => EditProduct::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUsers::route('/create'),
+            'edit' => EditUsers::route('/{record}/edit'),
         ];
     }
 

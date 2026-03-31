@@ -138,6 +138,20 @@
 
             @endif
 
+            @if(!is_null($order->paid_amount))
+                <div class="flex justify-between text-xs">
+                    <span>Uang Bayar</span>
+                    <span>Rp {{ number_format($order->paid_amount) }}</span>
+                </div>
+
+                <div class="flex justify-between text-xs">
+                    <span>Kembalian</span>
+                    <span>
+                        Rp {{ number_format(max(0, (float) $order->paid_amount - (float) $order->total_price)) }}
+                    </span>
+                </div>
+            @endif
+
         </div>
 
 

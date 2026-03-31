@@ -17,6 +17,15 @@ class OrderInfolist
                 TextEntry::make('customer_id')
                     ->numeric(),
                 TextEntry::make('payment_method'),
+                TextEntry::make('paid_amount')
+                    ->label('Uang Bayar')
+                    ->money('IDR'),
+                TextEntry::make('change_amount')
+                    ->label('Kembalian')
+                    ->state(function (Order $record): float {
+                        return max(0, (float) $record->paid_amount - (float) $record->total_price);
+                    })
+                    ->money('IDR'),
                 TextEntry::make('payment_proof')
                     ->placeholder('-'),
                 TextEntry::make('total_price')

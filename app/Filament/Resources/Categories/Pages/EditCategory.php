@@ -9,6 +9,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Notifications\Notification;
 use App\Models\Product;
+use App\Models\Category;
 
 class EditCategory extends EditRecord
 {
@@ -33,6 +34,10 @@ class EditCategory extends EditRecord
 
                         $this->halt();
                     }
+
+                    Category::withTrashed()
+                        ->find($record->id)
+                        ->forceDelete();
                 }),
 
             ForceDeleteAction::make(),
