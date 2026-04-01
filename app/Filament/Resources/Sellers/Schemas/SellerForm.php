@@ -19,7 +19,8 @@ class SellerForm
             ->components([
                 fileUpload::make('image')
                     ->image()
-                    ->directory('seller-images')
+                    ->disk('public')
+                    ->directory('profile-photos')
                     ->visibility('public'),
                 TextInput::make('nik')
                     ->required()

@@ -8,7 +8,6 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
@@ -106,10 +105,7 @@ class CheckoutController extends Controller
                     $total += $subtotal;
                 }
 
-                $orderCode = 'ORD-' . strtoupper(Str::random(6));
-
                 $order = Order::create([
-                    'order_code' => $orderCode,
                     'customer_id' => $customerId,
                     'seller_id' => $sellerId,
                     'total_price' => $total,
@@ -127,7 +123,7 @@ class CheckoutController extends Controller
                     $item['product']->decrement('stock', $item['quantity']);
                 }
 
-                $createdOrders[] = $orderCode;
+                $createdOrders[] = $order->order_code;
             }
         });
 

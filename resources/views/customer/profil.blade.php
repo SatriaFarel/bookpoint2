@@ -7,6 +7,7 @@
     $userNik = old('nik', $user->nik ?? '');
     $userNoRekening = old('no_rekening', $user->no_rekening ?? '');
     $initial = strtoupper(substr($userName, 0, 1));
+    $profileImage = $user?->image ? asset('storage/' . $user->image) : null;
 @endphp
 
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-emerald-50">
@@ -69,9 +70,21 @@
         <div class="bg-white/90 backdrop-blur p-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-xl transition">
             <div class="flex flex-col sm:flex-row items-center gap-5">
 
-                <div class="w-20 h-20 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white flex items-center justify-center text-3xl font-bold shadow">
-                    {{ $initial }}
-                </div>
+                @if($profileImage)
+                    <img id="profilePreview"
+                         src="{{ $profileImage }}"
+                         alt="{{ $userName }}"
+                         class="w-20 h-20 rounded-full object-cover shadow">
+                @else
+                    <div id="profileInitial"
+                         class="w-20 h-20 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white flex items-center justify-center text-3xl font-bold shadow">
+                        {{ $initial }}
+                    </div>
+                    <img id="profilePreview"
+                         src=""
+                         alt="{{ $userName }}"
+                         class="w-20 h-20 rounded-full object-cover shadow hidden">
+                @endif
 
                 <div class="text-center sm:text-left">
                     <h2 class="text-2xl font-bold text-slate-800">{{ $userName }}</h2>
@@ -86,6 +99,7 @@
 
             <form method="POST"
                   action="{{ route('customer.profile.update') }}"
+                  enctype="multipart/form-data"
                   class="bg-white/80 backdrop-blur p-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-xl transition space-y-4">
                 @csrf
                 @method('PATCH')
@@ -95,6 +109,17 @@
                 </h2>
 
                 <div class="space-y-3 text-sm">
+                    <div>
+                        <label for="foto" class="block text-slate-600 mb-1">Foto Profil</label>
+                        <input id="foto" name="foto" type="file" accept="image/*"
+                               onchange="previewProfilePhoto(event)"
+                               class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300">
+                        <p class="text-xs text-slate-400 mt-1">Format: jpg, jpeg, png, webp. Maksimal 2MB.</p>
+                        @error('foto')
+                            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
                     <div>
                         <label for="name" class="block text-slate-600 mb-1">Nama</label>
                         <input id="name" name="name" type="text" value="{{ $userName }}"
@@ -169,5 +194,24 @@
     </main>
 
 </div>
+
+<script>
+    function previewProfilePhoto(event) {
+        const file = event.target.files?.[0];
+        const preview = document.getElementById('profilePreview');
+        const initial = document.getElementById('profileInitial');
+
+        if (!file || !preview) {
+            return;
+        }
+
+        preview.src = URL.createObjectURL(file);
+        preview.classList.remove('hidden');
+
+        if (initial) {
+            initial.classList.add('hidden');
+        }
+    }
+</script>
 
 @endsection

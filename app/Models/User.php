@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable implements HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -24,7 +26,7 @@ class User extends Authenticatable implements HasAvatar
     use SoftDeletes; // wajib ini
 
     protected $fillable = [
-        'nik',
+        // 'nik',
         'name',
         'email',
         'password',
@@ -70,11 +72,32 @@ class User extends Authenticatable implements HasAvatar
         return null; // fallback ke huruf kalau kosong
     }
 
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() !== 'admin') {
+            return false;
+        }
+
+        return in_array($this->role, ['admin', 'seller'], true);
+    }
+
     protected static function booted()
     {
-        static::forceDeleted(function ($product) {
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
+        static::updated(function (self $user) {
+            if (! $user->wasChanged('image')) {
+                return;
+            }
+
+            $oldImage = $user->getOriginal('image');
+
+            if ($oldImage && $oldImage !== $user->image && Storage::disk('public')->exists($oldImage)) {
+                Storage::disk('public')->delete($oldImage);
+            }
+        });
+
+        static::deleting(function (self $user) {
+            if ($user->image && Storage::disk('public')->exists($user->image)) {
+                Storage::disk('public')->delete($user->image);
             }
         });
     }

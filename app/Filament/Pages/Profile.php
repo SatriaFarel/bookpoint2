@@ -13,7 +13,7 @@ use Dom\Text;
 
 class Profile extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserCircle;
     protected string $view = 'filament.pages.profile';
 
     protected static ?int $navigationSort = 1;
@@ -72,8 +72,13 @@ class Profile extends Page
     public function save(): void
     {
         $user = auth()->user();
+        $data = $this->form->getState();
 
-        $user->update($this->form->getState());
+        if (blank($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
 
         Notification::make()
             ->title('Profile berhasil diperbarui')

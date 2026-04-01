@@ -38,11 +38,11 @@ class AuthController extends Controller
         }
 
         /* upload foto */
-        $fotoPath = $request->file('foto')->store('profile', 'public');
+        $fotoPath = $request->file('foto')->store('profile-photos', 'public');
 
         User::create([
             'role'        => $request->role,
-            'nik'         => $request->nik,
+            // 'nik'         => $request->nik,
             'name'        => $request->name,
             'email'       => $request->email,
             'password'    => Hash::make($request->password),
@@ -71,31 +71,38 @@ class AuthController extends Controller
             return back()->with('error', 'Email atau password salah');
         }
 
+        $request->session()->regenerate();
+
         $user = Auth::guard('customer')->user();
 
         if (!$user->is_active) {
-            Auth::logout();
+            Auth::guard('customer')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
             return back()->with('error', 'Akun tidak aktif');
         }
 
-        $user->update([
-            'is_active' => 'Online'
-        ]);
+        if ($user->role !== 'customer') {
+            Auth::guard('customer')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->with('error', 'Login customer hanya untuk akun customer.');
+        }
 
         return redirect('/customer/dashboard');
     }
 
     /* ================= LOGOUT ================= */
-    public function logout()
+    public function logout(Request $request)
     {
         if (Auth::guard('customer')->check()) {
-
-            Auth::guard('customer')->user()->update([
-                'is_active' => 'Offline'
-            ]);
-
             Auth::guard('customer')->logout();
         }
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return redirect('/customer/login')
             ->with('success', 'Logout berhasil');

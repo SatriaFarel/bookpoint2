@@ -5,28 +5,40 @@ namespace App\Http\Controllers;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
+    protected function currentUser(): ?User
+    {
+        return Auth::guard('customer')->user() ?? Auth::user();
+    }
 
     /*
     | Halaman utama chat
     */
     public function index()
     {
-        $chats = User::where('id', '!=', auth()->id())->get();
+        $auth = $this->currentUser();
+
+        abort_unless($auth, 401);
+
+        $chats = User::where('id', '!=', $auth->id)->get();
 
         return view('admin.chat', [
             'chats' => $chats,
             'messages' => [],
-            'partner' => null
+            'partner' => null,
+            'authId' => $auth->id,
         ]);
     }
 
     /* ===== HALAMAN CHAT ===== */
     public function show(User $user)
     {
-        $auth = auth()->user();
+        $auth = $this->currentUser();
+
+        abort_unless($auth, 401);
 
         /* daftar chat partner */
         $chats = Message::where('sender_id', $auth->id)
@@ -42,6 +54,10 @@ class ChatController extends Controller
             })
             ->unique('id')
             ->values();
+
+        if (! $chats->contains('id', $user->id)) {
+            $chats->prepend($user);
+        }
 
         /* ambil percakapan */
         $messages = Message::where(function ($q) use ($auth, $user) {
@@ -60,7 +76,8 @@ class ChatController extends Controller
         return view('chat.index', [
             'partner' => $user,
             'messages' => $messages,
-            'chats' => $chats
+            'chats' => $chats,
+            'authId' => $auth->id,
         ]);
     }
 
@@ -68,6 +85,9 @@ class ChatController extends Controller
     /* ===== KIRIM PESAN ===== */
     public function send(Request $request)
     {
+        $auth = $this->currentUser();
+
+        abort_unless($auth, 401);
 
         $request->validate([
             'receiver_id' => 'required',
@@ -75,7 +95,7 @@ class ChatController extends Controller
         ]);
 
         Message::create([
-            'sender_id' => auth()->id(),
+            'sender_id' => $auth->id,
             'receiver_id' => $request->receiver_id,
             'message' => $request->message
         ]);
@@ -88,21 +108,28 @@ class ChatController extends Controller
     */
     public function messages($user)
     {
+        $auth = $this->currentUser();
+
+        abort_unless($auth, 401);
 
         $partner = User::findOrFail($user);
 
-        $messages = Message::where(function ($q) use ($user) {
+        $messages = Message::where(function ($q) use ($user, $auth) {
 
-            $q->where('sender_id', auth()->id())
+            $q->where('sender_id', $auth->id)
                 ->where('receiver_id', $user);
-        })->orWhere(function ($q) use ($user) {
+        })->orWhere(function ($q) use ($user, $auth) {
 
             $q->where('sender_id', $user)
-                ->where('receiver_id', auth()->id());
+                ->where('receiver_id', $auth->id);
         })
             ->orderBy('created_at')
             ->get();
 
-        return view('partials.messages', compact('messages', 'partner'));
+        return view('partials.messages', [
+            'messages' => $messages,
+            'partner' => $partner,
+            'authId' => $auth->id,
+        ]);
     }
 }

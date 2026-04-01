@@ -19,7 +19,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/admin/invoice/{id}', [OrderController::class, 'invoice']);
+Route::middleware('auth')->prefix('admin')->group(function () {
+    Route::get('/invoice/{id}', [OrderController::class, 'invoice'])->name('admin.invoice');
+});
 
 
 /*
@@ -29,8 +31,8 @@ Route::get('/admin/invoice/{id}', [OrderController::class, 'invoice']);
 */
 
 Route::prefix('customer')->group(function () {
-    Route::view('/login', 'login');
-    Route::view('/register', 'register');
+    Route::view('/login', 'login')->name('login');
+    Route::view('/register', 'register')->name('register');
     Route::get('/forgot-password', [AuthController::class, 'index'])->name('customer.forgot.password');
     Route::post('/forgot-password', [AuthController::class, 'sendOtp']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
@@ -71,6 +73,7 @@ Route::middleware('auth:customer')->prefix('customer')->group(function () {
     /*
     | Invoice
     */
+    Route::get('/invoice/{id}', [OrderController::class, 'invoice'])->name('customer.invoice');
     Route::post('/order/pay/{id}', [OrderController::class, 'pay']);
     Route::post('/order/done/{id}', [OrderController::class, 'done']);
 
@@ -122,5 +125,5 @@ Route::middleware('auth')->group(function () {
 Route::get('/chat/{user}', [ChatController::class, 'showAdmin'])
     ->name('admin.chat.show');
 
-Route::post('/messages', [ChatController::class, 'send'])
+Route::middleware('auth:web,customer')->post('/messages', [ChatController::class, 'send'])
     ->name('messages.send');

@@ -14,7 +14,7 @@ class OrderController extends Controller
     public function buyerHistory()
     {
         $orders = Order::with('items.product')
-            ->where('customer_id', Auth::id())
+            ->where('customer_id', Auth::guard('customer')->id())
             ->latest()
             ->get();
 
@@ -26,7 +26,7 @@ class OrderController extends Controller
 
     /* ================= INVOICE ================= */
 
-    public function invoice($id)
+    public function invoice(Request $request, $id)
     {
         $order = Order::with([
             'items.product',
@@ -34,7 +34,18 @@ class OrderController extends Controller
             'seller'
         ])->findOrFail($id);
 
-        return view('customer.invoice', compact('order'));
+        $isCustomerInvoice = $request->routeIs('customer.invoice');
+
+        if ($isCustomerInvoice && $order->customer_id !== Auth::guard('customer')->id()) {
+            abort(403);
+        }
+
+        return view('customer.invoice', [
+            'order' => $order,
+            'backUrl' => $isCustomerInvoice ? '/customer/transactions' : '/admin/orders',
+            'backLabel' => $isCustomerInvoice ? 'Kembali ke Transaksi' : 'Kembali ke Order',
+            'invoiceTitle' => $isCustomerInvoice ? 'Invoice Transaksi' : 'Invoice Order Admin',
+        ]);
     }
 
 }

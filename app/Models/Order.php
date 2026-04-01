@@ -45,10 +45,12 @@ class Order extends Model
         parent::boot();
 
         static::creating(function ($order) {
+            if ($order->order_code) {
+                return;
+            }
 
             $order->order_code =
                 'ORD-' . date('Ymd') . '-' . rand(1000,9999);
-
         });
     }
 }

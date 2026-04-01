@@ -18,9 +18,9 @@
                     <a wire:click="loadChat({{ $c->id }})"
                         class="flex items-center gap-3 px-4 py-3 hover:bg-white dark:hover:bg-gray-800 transition border-b border-gray-200 dark:border-gray-700 cursor-pointer">
 
-                        @if($c->foto)
+                        @if($c->image)
 
-                            <img src="{{ asset('storage/' . $c->foto) }}" class="w-11 h-11 rounded-full object-cover">
+                            <img src="{{ asset('storage/' . $c->image) }}" class="w-11 h-11 rounded-full object-cover">
 
                         @else
 
@@ -61,9 +61,9 @@
 
                 @if($partner)
 
-                    @if($partner->foto)
+                    @if($partner->image)
 
-                        <img src="{{ asset('storage/' . $partner->foto) }}" class="w-10 h-10 rounded-full object-cover">
+                        <img src="{{ asset('storage/' . $partner->image) }}" class="w-10 h-10 rounded-full object-cover">
 
                     @else
 

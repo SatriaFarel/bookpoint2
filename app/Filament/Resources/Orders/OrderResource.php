@@ -33,7 +33,7 @@ class OrderResource extends Resource
         $user = auth()->user();
 
         if ($user && $user->role === 'admin') {
-            $query->where('seller_id', $user->id);
+            $query->where('seller_id', $user->id)->whereIn('status', ['paid', 'pending']);
         }
 
         return $query;

@@ -118,7 +118,7 @@
                         dengan promo spesial hingga 50%.
                     </p>
 
-                    <a href="/promo"
+                    <a href=""
                         class="px-7 py-3 bg-blue-500 hover:bg-blue-600 transition rounded-xl font-semibold shadow-lg hover:shadow-xl">
 
                         Lihat Promo
@@ -156,6 +156,36 @@
         {{-- CONTENT --}}
         <main class="max-w-7xl mx-auto px-4 py-8">
 
+            <section class="mb-8 space-y-4">
+                <div class="flex items-center justify-between gap-4 flex-wrap">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-700">Filter kategori</p>
+                        <p class="text-xs text-slate-500">Pilih kategori untuk menampilkan produk yang sesuai.</p>
+                    </div>
+
+                    @if(request('search') || $selectedCategory)
+                        <a href="/customer/dashboard"
+                           class="inline-flex items-center px-4 py-2 rounded-full border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:text-blue-600 hover:border-blue-200 transition">
+                            Reset Filter
+                        </a>
+                    @endif
+                </div>
+
+                <div class="flex gap-3 overflow-x-auto pb-2">
+                    <a href="{{ route('dashboard', array_filter(['search' => request('search')])) }}"
+                       class="whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium transition {{ empty($selectedCategory) ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-200 hover:text-blue-600' }}">
+                        Semua
+                    </a>
+
+                    @foreach($categories as $category)
+                        <a href="{{ route('dashboard', array_filter(['search' => request('search'), 'category' => $category->id])) }}"
+                           class="whitespace-nowrap px-4 py-2 rounded-full border text-sm font-medium transition {{ (string) $selectedCategory === (string) $category->id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-200 hover:text-blue-600' }}">
+                            {{ $category->name }}
+                        </a>
+                    @endforeach
+                </div>
+            </section>
+
             @if($books->isEmpty())
 
                 <div class="flex flex-col items-center justify-center text-center py-20">
@@ -172,7 +202,7 @@
 
                     <a href="/customer/dashboard"
                        class="px-5 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm shadow inline-block">
-                        Reset Pencarian
+                        Reset Filter
                     </a>
                     
                 </div>
@@ -365,7 +395,15 @@
 
                     const value = this.value;
 
-                    window.location = "/customer/dashboard?search=" + encodeURIComponent(value);
+                    const params = new URLSearchParams(window.location.search);
+
+                    if (value) {
+                        params.set('search', value);
+                    } else {
+                        params.delete('search');
+                    }
+
+                    window.location = "/customer/dashboard?" + params.toString();
 
                 }, 500);
 

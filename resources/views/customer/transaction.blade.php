@@ -96,7 +96,7 @@
                             <h3 class="font-semibold text-slate-800 line-clamp-2">
                                 @foreach($order->items as $item)
                                     {{ $item->name }}
-                                    @if(!$loop->last), @endif
+                                    @if(!$loop->last) @endif
                                 @endforeach
                             </h3>
 
@@ -143,71 +143,16 @@
 
                     {{-- FOOTER --}}
                     <div class="flex justify-end gap-2 mt-4">
-
-                        <button onclick="openInvoice({{ $order->id }})"
+                        @if ($order->status == 'paid' || $order->status == 'done')
+                        <a href="{{ route('customer.invoice', $order->id) }}"
                                 class="px-4 py-2 text-sm rounded-lg bg-slate-100 hover:bg-indigo-600 hover:text-white transition">
                             Lihat Invoice
-                        </button>
+                        </a>
+                        @endif
 
                     </div>
 
                 </div>
-
-                {{-- MODAL --}}
-                <div id="invoiceModal{{ $order->id }}"
-                     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-
-                    <div class="bg-white w-full max-w-md p-6 rounded-2xl space-y-4 shadow-2xl border border-indigo-100">
-
-                        <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-lg text-slate-800">Invoice</h2>
-                            <button onclick="closeInvoice({{ $order->id }})"
-                                    class="text-slate-400 hover:text-black text-xl">×</button>
-                        </div>
-
-                        {{-- INFO --}}
-                        <div class="text-sm space-y-1 text-slate-600">
-                            <p><b>Order Code:</b> {{ $order->order_code }}</p>
-                            <p><b>Tanggal:</b> {{ $order->created_at->format('d M Y H:i') }}</p>
-                            <p><b>Status:</b> {{ ucfirst($order->status) }}</p>
-                            <p><b>Penjual:</b> {{ $order->seller->name ?? 'Admin' }}</p>
-                        </div>
-
-                        <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-1">
-                            <p><b>Payment:</b> {{ $order->payment_method }}</p>
-                            <p><b>Paid:</b> Rp {{ number_format($order->paid_amount) }}</p>
-
-                            @if($order->resi)
-                                <p><b>Resi:</b> {{ $order->resi }}</p>
-                            @endif
-                        </div>
-
-                        <hr>
-
-                        {{-- ITEMS --}}
-                        <div class="space-y-2 text-sm">
-                            @foreach($order->items as $item)
-                                <div class="flex justify-between">
-                                    <span>{{ $item->name }} x{{ $item->quantity }}</span>
-                                    <span>Rp {{ number_format($item->price * $item->quantity) }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <hr>
-
-                        {{-- TOTAL --}}
-                        <div class="flex justify-between font-bold text-lg">
-                            <span>Total</span>
-                            <span class="text-indigo-600">
-                                Rp {{ number_format($order->total_price) }}
-                            </span>
-                        </div>
-
-                    </div>
-
-                </div>
-
             @endforeach
 
         </div>
@@ -215,17 +160,4 @@
     </main>
 
 </div>
-
-<script>
-function openInvoice(id) {
-    document.getElementById('invoiceModal' + id).classList.remove('hidden')
-    document.getElementById('invoiceModal' + id).classList.add('flex')
-}
-
-function closeInvoice(id) {
-    document.getElementById('invoiceModal' + id).classList.add('hidden')
-    document.getElementById('invoiceModal' + id).classList.remove('flex')
-}
-</script>
-
 @endsection

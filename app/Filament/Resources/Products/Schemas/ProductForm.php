@@ -22,18 +22,30 @@ class ProductForm
                 Hidden::make('seller_id')
                     ->default(auth()->id())
                     ->required(),
-                //combo box\
+                
                 Select::make('category_id')
                     ->label('Category')
-                    ->options(Category::pluck('name', 'id'))
+                    ->options(fn () => Category::query()->orderBy('name')->pluck('name', 'id'))
+                    ->preload()
                     ->searchable()
+                    ->createOptionForm([
+                        TextInput::make('name')
+                            ->label('Nama Kategori')
+                            ->required()
+                            ->unique(table: 'category', column: 'name'),
+                    ])
+                    ->createOptionUsing(function (array $data): int {
+                        return Category::create([
+                            'name' => $data['name'],
+                        ])->id;
+                    })
                     ->required(),
 
                 TextInput::make('name')
                     ->required()
                     ->unique(ignoreRecord: true),
                 TextInput::make('description')
-                    ->nullable(),
+                    ->required(),
                 TextInput::make('price')
                     ->required()
                     ->numeric()

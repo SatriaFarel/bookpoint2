@@ -138,7 +138,7 @@ class OrdersTable
                             ->success()
                             ->send();
 
-                        return redirect('/admin/invoice/' . $record->id);
+                        return redirect()->route('admin.invoice', $record->id);
                     }),
 
                 /* ================= SELESAI ================= */
@@ -162,7 +162,7 @@ class OrdersTable
                     ->label('Print Struk')
                     ->icon('heroicon-o-printer')
                     ->color('gray')
-                    ->url(fn($record) => url('/admin/invoice/' . $record->id))
+                    ->url(fn($record) => route('admin.invoice', $record->id))
                     ->openUrlInNewTab()
                     ->visible(fn($record) => in_array($record->status, ['paid', 'done'])),
 

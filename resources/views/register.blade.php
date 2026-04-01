@@ -61,8 +61,8 @@
                 </div>
 
                 {{-- INPUT --}}
-                <input name="nik" placeholder="NIK"
-                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">
+                {{-- <input name="nik" placeholder="NIK"
+                    class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none"> --}}
 
                 <input name="name" placeholder="Nama Lengkap"
                     class="w-full border px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none">

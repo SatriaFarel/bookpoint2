@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class Product extends Model
 {
     use SoftDeletes; // wajib ini
+
     protected $table = 'products';
 
     protected $fillable = [
@@ -33,7 +34,19 @@ class Product extends Model
 
     protected static function booted()
     {
-        static::forceDeleted(function ($product) {
+        static::updated(function (self $product) {
+            if (! $product->wasChanged('image')) {
+                return;
+            }
+
+            $oldImage = $product->getOriginal('image');
+
+            if ($oldImage && $oldImage !== $product->image && Storage::disk('public')->exists($oldImage)) {
+                Storage::disk('public')->delete($oldImage);
+            }
+        });
+
+        static::deleting(function (self $product) {
             if ($product->image && Storage::disk('public')->exists($product->image)) {
                 Storage::disk('public')->delete($product->image);
             }

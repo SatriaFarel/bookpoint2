@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
@@ -12,14 +12,19 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::query();
+        $query = Product::with('category');
 
         // SEARCH
         if ($request->search) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+
         $books = $query->latest()->get();
+        $categories = Category::orderBy('name')->get();
 
         // cart count (session)
         $cart = session()->get('cart', []);
@@ -27,7 +32,9 @@ class ProductController extends Controller
 
         return view('customer.dashboard', [
             'books' => $books,
-            'cartCount' => $cartCount
+            'cartCount' => $cartCount,
+            'categories' => $categories,
+            'selectedCategory' => $request->category,
         ]);
     }
 

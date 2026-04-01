@@ -3,16 +3,22 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class ProfileUpdateRequest extends FormRequest
 {
+    protected function currentUserId(): ?int
+    {
+        return Auth::guard('customer')->id() ?? $this->user()?->id;
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user() !== null;
+        return $this->currentUserId() !== null;
     }
 
     /**
@@ -30,10 +36,11 @@ class ProfileUpdateRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($this->user()?->id),
+                Rule::unique('users', 'email')->ignore($this->currentUserId()),
             ],
             'nik' => ['nullable', 'string', 'max:32'],
             'no_rekening' => ['nullable', 'string', 'max:50'],
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 }

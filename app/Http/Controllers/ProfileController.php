@@ -8,16 +8,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
+    protected function currentUser(Request $request): ?User
+    {
+        return Auth::guard('customer')->user() ?? $request->user();
+    }
+
     /**
      * Display the user's profile form.
      */
     public function edit(Request $request): View
     {
+        $user = $this->currentUser($request);
+
+        abort_unless($user, 401);
+
         return view('customer.profil', [
-            'user' => $request->user(),
+            'user' => $user,
         ]);
     }
 
@@ -26,12 +36,18 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $this->currentUser($request);
+
+        abort_unless($user, 401);
 
         $user->fill($request->validated());
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
+        }
+
+        if ($request->hasFile('foto')) {
+            $user->image = $request->file('foto')->store('profile-photos', 'public');
         }
 
         $user->save();

@@ -29,8 +29,8 @@
                    class="flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 transition border-b">
 
                     {{-- AVATAR --}}
-                    @if($c->foto)
-                        <img src="{{ asset('storage/' . $c->foto) }}"
+                    @if($c->image)
+                        <img src="{{ asset('storage/' . $c->image) }}"
                              class="w-11 h-11 rounded-full object-cover shadow" />
                     @else
                         <div class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500
@@ -72,8 +72,8 @@
                         ←
                     </a>
 
-                    @if($partner->foto)
-                        <img src="{{ asset('storage/' . $partner->foto) }}"
+                    @if($partner->image)
+                        <img src="{{ asset('storage/' . $partner->image) }}"
                              class="w-11 h-11 rounded-full object-cover shadow" />
                     @else
                         <div class="w-11 h-11 rounded-full bg-gradient-to-r from-indigo-500 to-blue-500
@@ -102,11 +102,11 @@
 
                 @foreach($messages as $m)
 
-                    <div class="flex {{ $m->sender_id == auth()->id() ? 'justify-end' : 'justify-start' }}">
+                    <div class="flex {{ $m->sender_id == $authId ? 'justify-end' : 'justify-start' }}">
 
                         <div class="
                             px-4 py-2 rounded-2xl text-sm max-w-xs shadow
-                            {{ $m->sender_id == auth()->id()
+                            {{ $m->sender_id == $authId
                                 ? 'bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-br-none'
                                 : 'bg-white text-slate-700 border rounded-bl-none'
                             }}
