@@ -7,9 +7,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use BackedEnum;
 use Filament\Support\Icons\Heroicon;
+use Livewire\WithPagination;
 
 class Report extends Page
 {
+    use WithPagination;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
     protected string $view = 'filament.pages.report';
     protected static ?string $title = 'Laporan Penjualan';
@@ -19,6 +22,7 @@ class Report extends Page
 
     public $filterMonth;
     public $filterYear;
+    public int $perPage = 10;
 
     /* ================= TABLE ================= */
 
@@ -75,7 +79,7 @@ class Report extends Page
             ->get();
     }
 
-    public function getPrintReports()
+    private function buildDoneOrderQuery()
     {
         $sellerId = Auth::id();
 
@@ -91,7 +95,25 @@ class Report extends Page
             $query->whereYear('created_at', $this->filterYear);
         }
 
-        return $query
+        return $query;
+    }
+
+    public function getPrintReports()
+    {
+        return $this->buildDoneOrderQuery()
+            ->select(
+                'order_code',
+                DB::raw('DATE(created_at) as date'),
+                'total_price',
+                'status'
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate($this->perPage);
+    }
+
+    public function getPrintReportsForExport()
+    {
+        return $this->buildDoneOrderQuery()
             ->select(
                 'order_code',
                 DB::raw('DATE(created_at) as date'),
@@ -100,5 +122,20 @@ class Report extends Page
             )
             ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+    public function getTotalDoneSales(): float
+    {
+        return (float) $this->buildDoneOrderQuery()->sum('total_price');
+    }
+
+    public function updatedFilterMonth(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterYear(): void
+    {
+        $this->resetPage();
     }
 }

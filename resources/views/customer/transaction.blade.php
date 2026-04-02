@@ -42,6 +42,9 @@
         <div class="space-y-5">
 
             @foreach($orders as $order)
+                @php
+                    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($order->order_code);
+                @endphp
 
                 <div class="bg-white/80 backdrop-blur p-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition duration-300">
 
@@ -130,6 +133,36 @@
                                 @endif
 
                             </div>
+
+                            @if($order->status == 'pending')
+                                <div class="mt-4 p-3 rounded-xl border border-blue-100 bg-blue-50">
+                                    <p class="text-xs font-semibold text-blue-700 mb-2">
+                                        QR Pembayaran
+                                    </p>
+
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                                        <img
+                                            src="{{ $qrUrl }}"
+                                            alt="QR {{ $order->order_code }}"
+                                            class="w-28 h-28 border border-blue-200 rounded-lg bg-white p-1.5"
+                                        >
+
+                                        <div class="text-xs text-slate-600">
+                                            Tunjukkan QR ini ke admin untuk pembayaran.
+                                            <div class="mt-2 flex flex-wrap gap-2">
+                                                <a href="{{ $qrUrl }}" target="_blank"
+                                                   class="inline-flex items-center px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 transition">
+                                                    Buka QR
+                                                </a>
+                                                <a href="{{ $qrUrl }}" download="qr-{{ $order->order_code }}.png"
+                                                   class="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition">
+                                                    Download QR
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
 
                         </div>
 

@@ -4,9 +4,8 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
-
 
 class UsersForm
 {
@@ -33,16 +32,12 @@ class UsersForm
                     ->password()
                     ->required(fn (string $operation): bool => $operation === 'create')
                     ->dehydrated(fn ($state): bool => filled($state))
-                    ->helperText('Kosongkan jika password tidak ingin diubah.'),
+                    ->visible(fn (string $operation): bool => $operation === 'create'),
                 // textInput::make('no_rekening')
                 //     ->required(),
-                Select::make('role')
-                    ->options([
-                        // 'admin' => 'Admin',
-                        'customer' => 'Customer',
-                    ])
-                    ->required()
-                    ->native(false),
+                Hidden::make('role')
+                    ->default('customer')
+                    ->required(),
             ]);
     }
 }

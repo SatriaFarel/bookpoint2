@@ -3,6 +3,15 @@
     @php
         $chartData = $this->getChartData();
         $reports = $this->getPrintReports();
+        $totalDoneSales = $this->getTotalDoneSales();
+        $pdfUrl = route('admin.report.pdf', [
+            'month' => $this->filterMonth,
+            'year' => $this->filterYear,
+        ]);
+        $excelUrl = route('admin.report.excel', [
+            'month' => $this->filterMonth,
+            'year' => $this->filterYear,
+        ]);
     @endphp
 
     <style>
@@ -78,14 +87,17 @@
     <div class="space-y-8">
 
 
-        {{-- FILTER + PRINT --}}
+        {{-- ACTION EXPORT --}}
         <div class="flex justify-between no-print">
 
-            <button onclick="window.print()" class="px-4 py-2 bg-green-600 text-white rounded">
-
-                Print Laporan
-
-            </button>
+            <div class="flex gap-2">
+                <a href="{{ $pdfUrl }}" target="_blank" class="px-4 py-2 bg-red-600 text-white rounded">
+                    Export PDF
+                </a>
+                <a href="{{ $excelUrl }}" class="px-4 py-2 bg-emerald-600 text-white rounded">
+                    Export Excel
+                </a>
+            </div>
 
         </div>
 
@@ -168,20 +180,11 @@
 
                     <tbody>
 
-                        @php
-                            $total = 0;
-                        @endphp
-
                         @foreach($reports as $i => $row)
-
-                            @php
-                                $total += $row->total_price;
-                            @endphp
-
                             <tr class="dark:bg-gray-800">
 
                                 <td class="px-6 py-3">
-                                    {{ $i + 1 }}
+                                    {{ ($reports->firstItem() ?? 0) + $i }}
                                 </td>
 
                                 <td class="px-6 py-3 font-mono">
@@ -216,7 +219,7 @@
                             </td>
 
                             <td class="px-6 py-3 text-right text-green-600">
-                                Rp {{ number_format($total) }}
+                                Rp {{ number_format($totalDoneSales) }}
                             </td>
 
                             <td></td>
@@ -227,6 +230,10 @@
 
                 </table>
 
+            </div>
+
+            <div class="mt-4 no-print">
+                {{ $reports->links() }}
             </div>
 
         </div>

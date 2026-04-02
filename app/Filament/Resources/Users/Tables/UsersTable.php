@@ -5,11 +5,13 @@ namespace App\Filament\Resources\Users\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 
 class UsersTable
 {
@@ -36,6 +38,20 @@ class UsersTable
             ])
             ->recordActions([
                 EditAction::make(),
+                DeleteAction::make()
+                ->before(function ($record, $action) {
+
+                    if ($record->is_active === 'Online') {
+
+                        Notification::make()
+                            ->title('Users tidak dapat dihapus')
+                            ->body('Users sedang online.')
+                            ->danger()
+                            ->send();
+
+                        $action->cancel();
+                    }
+                }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

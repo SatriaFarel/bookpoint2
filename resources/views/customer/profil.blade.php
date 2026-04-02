@@ -138,14 +138,14 @@
                         @enderror
                     </div>
 
-                    <div>
+                    {{-- <div>
                         <label for="nik" class="block text-slate-600 mb-1">NIK</label>
                         <input id="nik" name="nik" type="text" value="{{ $userNik }}"
                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-300">
                         @error('nik')
                             <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                    </div>
+                    </div> --}}
 
                     <div>
                         <label for="no_rekening" class="block text-slate-600 mb-1">No Rekening</label>

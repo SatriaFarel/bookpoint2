@@ -8,6 +8,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ReportExportController;
+use App\Models\Product;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,11 +18,23 @@ use App\Http\Controllers\ChatController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $products = Product::query()
+        ->with('category')
+        ->where('stock', '>', 0)
+        ->latest()
+        ->take(8)
+        ->get();
+
+    return view('landing', [
+        'products' => $products,
+    ]);
 });
 
 Route::middleware('auth')->prefix('admin')->group(function () {
     Route::get('/invoice/{id}', [OrderController::class, 'invoice'])->name('admin.invoice');
+    Route::view('/orders/scan', 'filament.pages.order-scan')->name('admin.orders.scan');
+    Route::get('/report/pdf', [ReportExportController::class, 'pdf'])->name('admin.report.pdf');
+    Route::get('/report/excel', [ReportExportController::class, 'excel'])->name('admin.report.excel');
 });
 
 
@@ -54,8 +68,6 @@ Route::middleware('auth:customer')->prefix('customer')->group(function () {
     /*
     | Auth
     */
-
-
     Route::get('/chat/{user}', [ChatController::class, 'show'])
         ->name('chat.show');
 
@@ -90,8 +102,7 @@ Route::middleware('auth:customer')->prefix('customer')->group(function () {
     Route::patch('/cart/update/{id}', [CartController::class, 'update']);
     Route::delete('/cart/remove/{id}', [CartController::class, 'remove']);
 
-    Route::get('/about', function () { return view('customer.about');
-    });
+    Route::get('/about', function () { return view('customer.about');});
     Route::get('/profil', [ProfileController::class, 'edit'])->name('customer.profile.edit');
     Route::patch('/profil', [ProfileController::class, 'update'])->name('customer.profile.update');
     Route::get('/profile', [ProfileController::class, 'edit']);
