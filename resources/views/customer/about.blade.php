@@ -5,7 +5,7 @@
 <div class="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-emerald-50">
 
     {{-- NAVBAR --}}
-    <nav class="bg-white/70 backdrop-blur border-b border-indigo-100 sticky top-0 z-20 px-4 py-4 shadow-sm">
+    <nav class="bg-white border-b border-indigo-100 sticky top-0 z-20 px-4 py-4 shadow-sm">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
 
             <a href="/customer/dashboard"
@@ -13,7 +13,7 @@
                 BookStore
             </a>
 
-            <div class="flex gap-6 text-sm font-medium">
+            <div class="hidden md:flex gap-6 text-sm font-medium">
                 <a href="/customer/dashboard" class="text-slate-500 hover:text-indigo-600 transition">
                     Store
                 </a>
@@ -21,6 +21,8 @@
                     About Us
                 </a>
             </div>
+
+            @include('customer.partials.mobile-sidebar', ['active' => 'about'])
 
         </div>
     </nav>

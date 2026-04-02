@@ -5,14 +5,18 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
 
         {{-- NAV --}}
-           <nav class="bg-white/70 backdrop-blur border-b border-indigo-100 sticky top-0 z-20 px-4 py-4 shadow-sm">
-            <div class="max-w-5xl mx-auto flex items-center gap-4 p-4">
+           <nav class="bg-white border-b border-indigo-100 sticky top-0 z-20 px-4 py-4 shadow-sm">
+            <div class="max-w-5xl mx-auto flex items-center justify-between gap-4 p-4">
 
-                <a href="/customer/dashboard" class="text-lg hover:text-blue-600 transition">←</a>
+                <div class="flex items-center gap-4">
+                    <a href="/customer/dashboard" class="text-lg hover:text-blue-600 transition">←</a>
 
-                <h1 class="text-xl font-bold text-slate-800">
-                    Keranjang
-                </h1>
+                    <h1 class="text-xl font-bold text-slate-800">
+                        Keranjang
+                    </h1>
+                </div>
+
+                @include('customer.partials.mobile-sidebar', ['active' => 'cart'])
 
             </div>
         </nav>

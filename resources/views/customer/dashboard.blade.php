@@ -5,7 +5,7 @@
     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-emerald-50/40">
 
         {{-- NAV --}}
-        <nav class="bg-white/80 backdrop-blur border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+        <nav class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 <div class="flex justify-between h-16 items-center">
@@ -72,14 +72,14 @@
                         </a>
 
                         <a href="{{ route('customer.profile.edit') }}"
-                           class="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition">
+                           class="hidden md:inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 transition">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.25a7.5 7.5 0 1115 0" />
                             </svg>
                             <span class="hidden sm:inline text-sm font-medium">Profil</span>
                         </a>
 
-                        <form method="POST" action="/auth/logout">
+                        <form method="POST" action="/auth/logout" class="hidden md:block">
                             @csrf
 
                             <button class="text-sm text-slate-500 hover:text-red-500 transition px-2 py-1">
@@ -87,6 +87,8 @@
                             </button>
 
                         </form>
+
+                        @include('customer.partials.mobile-sidebar', ['active' => 'store'])
 
                     </div>
 
